@@ -1,0 +1,17 @@
+{
+  "name": "js-utils",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "ava"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "ava": "1.0.0-beta.4"
+  }
+}
