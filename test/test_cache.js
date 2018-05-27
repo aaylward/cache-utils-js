@@ -12,6 +12,7 @@ test('you can retrieve items you\'ve stored', t => {
   const removedA = cache.remove("a");
   t.true(removedA);
   t.false(cache.get("a").isPresent());
+  t.is(cache.size, 0);
 });
 
 test('lru cache evicts oldest item', t => {
@@ -27,4 +28,5 @@ test('lru cache evicts oldest item', t => {
   cache.put("f", 6);
 
   t.false(cache.remove("b"));
+  t.is(cache.size, 4);
 });
