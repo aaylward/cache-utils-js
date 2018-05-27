@@ -24,14 +24,6 @@ class LruCache {
     this.map = new Map();
     this.oldest = null;
     this.newest = null;
-    
-    this.put = this.put.bind(this);
-    this.get = this.get.bind(this);
-    this.remove = this.remove.bind(this);
-    this.clear = this.clear.bind(this);
-    this.onAccess = this.onAccess.bind(this);
-    this.unlink = this.unlink.bind(this);
-    this.makeUnlinkedNodeNewest = this.makeUnlinkedNodeNewest.bind(this);
   }
 
   put(key, value) {
@@ -53,7 +45,7 @@ class LruCache {
   get(key) {
     checkValue(key, "key");
     const nodeMaybe = Optional.of(this.map.get(key));
-    nodeMaybe.ifPresent(this.onAccess);
+    nodeMaybe.ifPresent((node) => this.onAccess(node));
     return nodeMaybe.map((node) => {
       return node.value;
     });
