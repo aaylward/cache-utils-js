@@ -1,5 +1,5 @@
 function nullShortCircuit(value, fn) {
-  if (value === null) {
+  if (value === null || null === undefined) {
     return value;
   }
   return fn.call(null, value);
@@ -22,7 +22,10 @@ class Optional {
   }
 
   map(fn) {
-    return Optional.of(nullShortCircuit(this.value, fn));
+    if (this.present) {
+      return Optional.of(fn.call(null, this.value));
+    }
+    return Optional.empty();
   }
 
   get() {
@@ -41,4 +44,4 @@ class Optional {
   }
 }
 
-module.exports = {Optional};
+module.exports = { Optional };

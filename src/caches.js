@@ -1,4 +1,4 @@
-import Optional from './optional.js';
+const Optional = require("./optional.js").Optional;
 
 function checkValue(value, message) {
   if (value === null || value === undefined) {
@@ -24,24 +24,21 @@ class LruCache {
     this.map = new Map();
     this.oldest = null;
     this.newest = null;
-
-    this.get = this.get.bind(this);
+    
     this.put = this.put.bind(this);
+    this.get = this.get.bind(this);
     this.remove = this.remove.bind(this);
     this.clear = this.clear.bind(this);
+    this.onAccess = this.onAccess.bind(this);
+    this.unlink = this.unlink.bind(this);
+    this.makeUnlinkedNodeNewest = this.makeUnlinkedNodeNewest.bind(this);
   }
 
   put(key, value) {
     checkValue(key, "key");
     checkValue(value, "value");
 
-    const nodeMaybe = Optional.of(this.map.get(key));
-
-    if (nodeMaybe.isPresent()) {
-      this.map.get(key).value = value;
-      this.onAccess(nodeMaybe.get());
-      return;
-    }
+    this.remove(key);
 
     const newNode = new Node(key, value);
     this.map.set(key, newNode);
@@ -57,7 +54,9 @@ class LruCache {
     checkValue(key, "key");
     const nodeMaybe = Optional.of(this.map.get(key));
     nodeMaybe.ifPresent(this.onAccess);
-    return nodeMaybe.map((l) => l.value);
+    return nodeMaybe.map((node) => {
+      return node.value;
+    });
   }
 
   remove(key) {
@@ -97,9 +96,16 @@ class LruCache {
   }
 
   makeUnlinkedNodeNewest(node) {
-    this.newest.newer = node;
-    node.older = this.newest;
+    if (this.newest !== null) {
+      node.older = this.newest;
+      this.newest.newer = node;
+    }
+    
     this.newest = node;
+
+    if (this.oldest === null) {
+      this.oldest = node;
+    }
   }
 
   onAccess(node) {
@@ -116,4 +122,4 @@ function newLruCache(capacity) {
   return new LruCache(capacity);
 }
 
-module.exports = {newLruCache};
+module.exports = { newLruCache };

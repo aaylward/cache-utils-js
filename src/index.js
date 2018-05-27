@@ -1,6 +1,3 @@
-import Optional from './optional.js';
-import { newLruCache } from './caches.js';
+const newLruCache = require("./caches.js").newLruCache;
 
-export {
-  newLruCache, Optional
-};
+module.exports = { newLruCache };
