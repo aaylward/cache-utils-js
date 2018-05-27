@@ -30,3 +30,17 @@ test('lru cache evicts oldest item', t => {
   t.false(cache.remove("b"));
   t.is(cache.size, 4);
 });
+
+test('lru cache clear empties cache', t => {
+  const cache = newLruCache(4);
+  cache.put("a", 1);
+  cache.put("b", 2);
+  cache.put("c", 3);
+  cache.put("d", 4);
+
+  t.is(cache.size, 4);
+
+  cache.clear();
+
+  t.is(cache.size, 0);
+});
