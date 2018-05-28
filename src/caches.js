@@ -1,10 +1,14 @@
 const Optional = require("./optional.js").Optional;
+const maps = new WeakMap();
+const sizes = new WeakMap();
+const capacities = new WeakMap();
+const oldests = new WeakMap();
+const newests = new WeakMap();
 
 function checkValue(value, message) {
   if (value === null || value === undefined) {
     throw new Error(message);
   }
-
   return value;
 }
 
@@ -19,11 +23,11 @@ class Node {
 
 class LruCache {
   constructor(capacity) {
-    this.capacity = checkValue(capacity, "capacity");
-    this.size = 0;
-    this.map = new Map();
-    this.oldest = null;
-    this.newest = null;
+    capacities.set(this, checkValue(capacity, "capacity"));
+    sizes.set(this, 0);
+    maps.set(this, new Map());
+    oldests.set(this, null);
+    newests.set(this, null);
   }
 
   put(key, value) {
@@ -33,18 +37,18 @@ class LruCache {
     this.remove(key);
 
     const newNode = new Node(key, value);
-    this.map.set(key, newNode);
+    maps.get(this).set(key, newNode);
     this.makeUnlinkedNodeNewest(newNode);
-    this.size++;
+    sizes.set(this, sizes.get(this) + 1);
 
-    if (this.size > this.capacity) {
-      this.remove(this.oldest.key);
+    if (sizes.get(this) > capacities.get(this)) {
+      this.remove(oldests.get(this).key);
     }
   }
 
   get(key) {
     checkValue(key, "key");
-    const nodeMaybe = Optional.of(this.map.get(key));
+    const nodeMaybe = Optional.of(maps.get(this).get(key));
     nodeMaybe.ifPresent((node) => this.onAccess(node));
     return nodeMaybe.map((node) => {
       return node.value;
@@ -53,20 +57,24 @@ class LruCache {
 
   remove(key) {
     checkValue(key, "key");
-    const nodeMaybe = Optional.of(this.map.get(key));
+    const nodeMaybe = Optional.of(maps.get(this).get(key));
     nodeMaybe.ifPresent(node => {
-      this.map.delete(key);
+      maps.get(this).delete(key);
+      sizes.set(this, sizes.get(this) - 1);
       this.unlink(node);
-      this.size--;
     });
     return nodeMaybe.isPresent();
   }
 
   clear() {
-    this.map.clear();
-    this.size = 0;
-    this.newest = null;
-    this.oldest = null;
+    maps.get(this).clear();
+    sizes.set(this, 0);
+    newests.set(this, null);
+    oldests.set(this, null);
+  }
+
+  size() {
+    return sizes.get(this);
   }
 
   unlink(node) {
@@ -78,30 +86,30 @@ class LruCache {
       node.newer.older = node.older;
     }
 
-    if (node === this.newest) {
-      this.newest = node.older;
+    if (node === newests.get(this)) {
+      newests.set(this, node.older);
     }
 
-    if (node === this.oldest) {
-      this.oldest = node.newer;
+    if (node === oldests.get(this)) {
+      oldests.set(this, node.newer);
     }
   }
 
   makeUnlinkedNodeNewest(node) {
-    if (this.newest !== null) {
-      node.older = this.newest;
-      this.newest.newer = node;
+    if (newests.get(this) !== null) {
+      node.older = newests.get(this);
+      newests.get(this).newer = node;
     }
     
-    this.newest = node;
+    newests.set(this, node);
 
-    if (this.oldest === null) {
-      this.oldest = node;
+    if (oldests.get(this) === null) {
+      oldests.set(this, node);
     }
   }
 
   onAccess(node) {
-    if (node === this.newest) {
+    if (node === newests.get(this)) {
       return;
     }
 
