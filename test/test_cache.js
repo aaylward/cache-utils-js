@@ -44,3 +44,11 @@ test('lru cache clear empties cache', t => {
 
   t.is(cache.size(), 0);
 });
+
+test('lru cache toJsObject works', t => {
+  const cache = newLruCache(4);
+  t.deepEqual(cache.toJsObject(), {}, "empty cache");
+
+  cache.put("apples", 42);
+  t.deepEqual(cache.toJsObject(), {"apples": 42}, "cache with stuff");
+});

@@ -22,10 +22,6 @@ class Node {
 }
 
 function unlink(node, cache) {
-  if (!(node instanceof Node)) {
-    throw new Error("not a Node");
-  }
-
   if (node.older !== null) {
     node.older.newer = node.newer;
   }
@@ -44,10 +40,6 @@ function unlink(node, cache) {
 }
 
 function makeUnlinkedNodeNewest(node, cache) {
-  if (!(node instanceof Node)) {
-    throw new Error("not a Node");
-  }
-
   if (newests.get(cache) !== null) {
     node.older = newests.get(cache);
     newests.get(cache).newer = node;
@@ -61,10 +53,6 @@ function makeUnlinkedNodeNewest(node, cache) {
 }
 
 function onAccess(node, cache) {
-  if (!(node instanceof Node)) {
-    throw new Error("not a Node");
-  }
-
   if (node === newests.get(cache)) {
     return;
   }
@@ -129,12 +117,16 @@ class LruCache {
     return sizes.get(this);
   }
 
-  toJson() {
-    const json = {};
+  toJsObject() {
+    const obj = {};
     for (const key of maps.get(this).keys()) {
-      json[key] = maps.get(this).get(key).value;
+      obj[key] = maps.get(this).get(key).value;
     }
-    return JSON.stringify(json);
+    return obj;
+  }
+
+  toJson() {
+    return JSON.stringify(this.toJsObject());
   }
 }
 
