@@ -128,6 +128,14 @@ class LruCache {
   size() {
     return sizes.get(this);
   }
+
+  toJson() {
+    const json = {};
+    for (const key of maps.get(this).keys()) {
+      json[key] = maps.get(this).get(key).value;
+    }
+    return JSON.stringify(json);
+  }
 }
 
 function newLruCache(capacity) {
