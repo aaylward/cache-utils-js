@@ -21,6 +21,58 @@ class Node {
   }
 }
 
+function unlink(node, cache) {
+  if (!(node instanceof Node)) {
+    throw new Error("not a Node");
+  }
+
+  if (node.older !== null) {
+    node.older.newer = node.newer;
+  }
+
+  if (node.newer !== null) {
+    node.newer.older = node.older;
+  }
+
+  if (node === newests.get(cache)) {
+    newests.set(cache, node.older);
+  }
+
+  if (node === oldests.get(cache)) {
+    oldests.set(cache, node.newer);
+  }
+}
+
+function makeUnlinkedNodeNewest(node, cache) {
+  if (!(node instanceof Node)) {
+    throw new Error("not a Node");
+  }
+
+  if (newests.get(cache) !== null) {
+    node.older = newests.get(cache);
+    newests.get(cache).newer = node;
+  }
+  
+  newests.set(cache, node);
+
+  if (oldests.get(cache) === null) {
+    oldests.set(cache, node);
+  }
+}
+
+function onAccess(node, cache) {
+  if (!(node instanceof Node)) {
+    throw new Error("not a Node");
+  }
+
+  if (node === newests.get(cache)) {
+    return;
+  }
+
+  unlink(node, cache);
+  makeUnlinkedNodeNewest(node, cache);
+}
+
 class LruCache {
   constructor(capacity) {
     capacities.set(this, checkValue(capacity, "capacity"));
@@ -38,7 +90,7 @@ class LruCache {
 
     const newNode = new Node(key, value);
     maps.get(this).set(key, newNode);
-    this.makeUnlinkedNodeNewest(newNode);
+    makeUnlinkedNodeNewest(newNode, this);
     sizes.set(this, sizes.get(this) + 1);
 
     if (sizes.get(this) > capacities.get(this)) {
@@ -49,7 +101,7 @@ class LruCache {
   get(key) {
     checkValue(key, "key");
     const nodeMaybe = Optional.of(maps.get(this).get(key));
-    nodeMaybe.ifPresent((node) => this.onAccess(node));
+    nodeMaybe.ifPresent((node) => onAccess(node, this));
     return nodeMaybe.map((node) => {
       return node.value;
     });
@@ -61,7 +113,7 @@ class LruCache {
     nodeMaybe.ifPresent(node => {
       maps.get(this).delete(key);
       sizes.set(this, sizes.get(this) - 1);
-      this.unlink(node);
+      unlink(node, this);
     });
     return nodeMaybe.isPresent();
   }
@@ -75,46 +127,6 @@ class LruCache {
 
   size() {
     return sizes.get(this);
-  }
-
-  unlink(node) {
-    if (node.older !== null) {
-      node.older.newer = node.newer;
-    }
-
-    if (node.newer !== null) {
-      node.newer.older = node.older;
-    }
-
-    if (node === newests.get(this)) {
-      newests.set(this, node.older);
-    }
-
-    if (node === oldests.get(this)) {
-      oldests.set(this, node.newer);
-    }
-  }
-
-  makeUnlinkedNodeNewest(node) {
-    if (newests.get(this) !== null) {
-      node.older = newests.get(this);
-      newests.get(this).newer = node;
-    }
-    
-    newests.set(this, node);
-
-    if (oldests.get(this) === null) {
-      oldests.set(this, node);
-    }
-  }
-
-  onAccess(node) {
-    if (node === newests.get(this)) {
-      return;
-    }
-
-    this.unlink(node);
-    this.makeUnlinkedNodeNewest(node);
   }
 }
 
