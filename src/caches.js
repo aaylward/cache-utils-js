@@ -73,6 +73,9 @@ class LruCache {
     this.get = this.get.bind(this);
     this.remove = this.remove.bind(this);
     this.clear = this.clear.bind(this);
+    this.size = this.size.bind(this);
+    this.toJsObject = this.toJsObject.bind(this);
+    this.toJson = this.toJson.bind(this);
   }
 
   get(key) {
