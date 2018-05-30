@@ -68,6 +68,11 @@ class LruCache {
     maps.set(this, new Map());
     oldests.set(this, null);
     newests.set(this, null);
+
+    this.put = this.put.bind(this);
+    this.get = this.get.bind(this);
+    this.remove = this.remove.bind(this);
+    this.clear = this.clear.bind(this);
   }
 
   put(key, value) {
