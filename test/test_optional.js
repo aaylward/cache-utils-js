@@ -67,3 +67,14 @@ test('filter returns empty if optional is empty', t => {
   const filtered = Optional.empty().filter((i) => true);
   t.false(filtered.isPresent());
 });
+
+test('filter returns present if optional is present and function returns true', t => {
+  const filtered = Optional.of(123).filter((i) => true);
+  t.true(filtered.isPresent());
+  t.is(filtered.get(), 123);
+});
+
+test('filter returns empty if optional is present and function returns false', t => {
+  const filtered = Optional.of(123).filter((i) => false);
+  t.false(filtered.isPresent());
+});
