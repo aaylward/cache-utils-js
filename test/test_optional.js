@@ -1,6 +1,10 @@
 import test from 'ava';
 import { Optional } from '../src/optional.js';
 
+test('optional get on empty throws error', t => {
+  t.throws(() => Optional.empty().get(), "no value");
+});
+
 test('optional of null is empty', t => {
   const ofNull = Optional.of(null);
   t.false(ofNull.isPresent());
