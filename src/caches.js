@@ -75,11 +75,26 @@ class LruCache {
     this.clear = this.clear.bind(this);
   }
 
+  get(key) {
+    checkValue(key, "key");
+    const nodeMaybe = Optional.of(maps.get(this).get(key));
+    nodeMaybe.ifPresent((node) => onAccess(node, this));
+    return nodeMaybe.map((node) => {
+      return node.value;
+    });
+  }
+
   put(key, value) {
     checkValue(key, "key");
     checkValue(value, "value");
 
-    this.remove(key);
+    const existingNodeMaybe = Optional.of(maps.get(this).get(key));
+    if (existingNodeMaybe.isPresent()) {
+      const existingNode = existingNodeMaybe.get();
+      existingNode.value = value;
+      onAccess(existingNode, this);
+      return;
+    }
 
     const newNode = new Node(key, value);
     maps.get(this).set(key, newNode);
@@ -89,15 +104,6 @@ class LruCache {
     if (sizes.get(this) > capacities.get(this)) {
       this.remove(oldests.get(this).key);
     }
-  }
-
-  get(key) {
-    checkValue(key, "key");
-    const nodeMaybe = Optional.of(maps.get(this).get(key));
-    nodeMaybe.ifPresent((node) => onAccess(node, this));
-    return nodeMaybe.map((node) => {
-      return node.value;
-    });
   }
 
   remove(key) {
@@ -124,8 +130,8 @@ class LruCache {
 
   toJsObject() {
     const obj = {};
-    for (const key of maps.get(this).keys()) {
-      obj[key] = maps.get(this).get(key).value;
+    for (const [key, node] of maps.get(this)) {
+      obj[key] = node.value;
     }
     return obj;
   }
