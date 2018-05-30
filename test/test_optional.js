@@ -62,3 +62,8 @@ test('ifPresent does not run if empty', t => {
   Optional.empty().ifPresent((i) => ran = true);
   t.false(ran);
 });
+
+test('filter returns empty if optional is empty', t => {
+  const filtered = Optional.empty().filter((i) => true);
+  t.false(filtered.isPresent());
+});

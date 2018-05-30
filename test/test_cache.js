@@ -44,9 +44,7 @@ test('it can clear cache', t => {
   cache.put("d", 4);
 
   t.is(cache.size(), 4);
-
   cache.clear();
-
   t.is(cache.size(), 0);
 });
 
