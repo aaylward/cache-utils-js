@@ -2,8 +2,8 @@ const presents = new WeakMap();
 const values = new WeakMap();
 
 function nullShortCircuit(value, fn) {
-  if (value === null || null === undefined) {
-    return value;
+  if (value === null || value === undefined) {
+    return value ;
   }
   return fn.call(null, value);
 }
